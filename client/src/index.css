@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: hsl(250, 80%, 60%);
+  --color-accent: hsl(170, 70%, 50%);
+  --color-background: hsl(230, 20%, 8%);
+  --color-surface: hsl(230, 20%, 15%);
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-white font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-surface/50 backdrop-blur-xl border border-white/10 shadow-xl;
+  }
+}
