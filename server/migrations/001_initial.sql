@@ -85,8 +85,8 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages (sender_id);
 CREATE INDEX IF NOT EXISTS idx_messages_receiver_id ON messages (receiver_id);
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages (
-    LEAST(sender_id, receiver_id),
-    GREATEST(sender_id, receiver_id),
+    (LEAST(sender_id, receiver_id)),
+    (GREATEST(sender_id, receiver_id)),
     created_at DESC
 );
 CREATE INDEX IF NOT EXISTS idx_messages_unread ON messages (receiver_id, is_read) WHERE NOT is_read;
@@ -105,12 +105,6 @@ CREATE TABLE IF NOT EXISTS friendships (
     -- Cannot send a friend request to yourself
     CONSTRAINT chk_no_self_friendship CHECK (requester_id <> addressee_id),
 
-    -- Only one friendship record per user pair
-    CONSTRAINT uq_friendship_pair UNIQUE (
-        LEAST(requester_id, addressee_id),
-        GREATEST(requester_id, addressee_id)
-    ),
-
     -- Status must be one of the allowed values
     CONSTRAINT chk_friendship_status CHECK (
         status IN ('pending', 'accepted', 'blocked')
@@ -120,6 +114,12 @@ CREATE TABLE IF NOT EXISTS friendships (
 CREATE INDEX IF NOT EXISTS idx_friendships_requester ON friendships (requester_id);
 CREATE INDEX IF NOT EXISTS idx_friendships_addressee ON friendships (addressee_id);
 CREATE INDEX IF NOT EXISTS idx_friendships_status ON friendships (status);
+
+-- Only one friendship record per user pair
+CREATE UNIQUE INDEX IF NOT EXISTS uq_friendship_pair ON friendships (
+    (LEAST(requester_id, addressee_id)),
+    (GREATEST(requester_id, addressee_id))
+);
 
 -- ============================================================
 -- UPDATED_AT TRIGGER FUNCTION

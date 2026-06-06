@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +20,7 @@ import (
 	"github.com/ForgeOfBit/Nihan/server/internal/models"
 	"github.com/ForgeOfBit/Nihan/server/internal/services"
 	"github.com/ForgeOfBit/Nihan/server/internal/ws"
+	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -27,6 +29,27 @@ import (
 )
 
 func main() {
+	devMode := flag.Bool("dev", false, "Start in dev mode with embedded PostgreSQL")
+	flag.Parse()
+
+	var postgres *embeddedpostgres.EmbeddedPostgres
+	if *devMode {
+		log.Println("Starting embedded PostgreSQL for dev mode...")
+		cfg := embeddedpostgres.DefaultConfig().Locale("C")
+		postgres = embeddedpostgres.NewDatabase(cfg)
+		if err := postgres.Start(); err != nil {
+			log.Fatalf("Failed to start embedded PostgreSQL: %v", err)
+		}
+		defer func() {
+			log.Println("Stopping embedded PostgreSQL...")
+			postgres.Stop()
+		}()
+
+		os.Setenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable")
+		os.Setenv("JWT_ACCESS_SECRET", "dev_access_secret")
+		os.Setenv("JWT_REFRESH_SECRET", "dev_refresh_secret")
+	}
+
 	// Load configuration.
 	cfg, err := config.Load()
 	if err != nil {

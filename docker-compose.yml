@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: nihan_db
+    environment:
+      POSTGRES_USER: nihan
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: nihan
+    ports:
+      - "5432:5432"
+    volumes:
+      - nihan_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  nihan_pgdata:

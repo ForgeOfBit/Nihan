@@ -19,6 +19,8 @@ export default defineConfig({
       },
     },
   },
+  optimizeDeps: {
+  },
   build: {
     outDir: 'dist',
     sourcemap: true,
